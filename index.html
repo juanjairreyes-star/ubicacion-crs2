@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+<title>CRS · Ubicación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap"
+  rel="stylesheet"
+/>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <h1 class="topbar__title">CRS <span class="topbar__divider">·</span> Ubicación</h1>
+      <span class="status" id="status">
+        <span class="status__dot" id="statusDot" aria-hidden="true"></span>
+        <span class="status__label" id="statusLabel">verificando</span>
+      </span>
+    </header>
+
+    <div class="operator-bar">
+      <label class="operator-bar__label" for="operadorInput">Operador</label>
+      <input
+        type="text"
+        id="operadorInput"
+        class="operator-bar__input"
+        placeholder="Tu nombre"
+        autocomplete="off"
+      />
+    </div>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab" data-tab="escanear" role="tab" aria-selected="true" type="button">Escanear</button>
+      <button class="tab" data-tab="cliente" role="tab" aria-selected="false" type="button">Por cliente</button>
+    </nav>
+
+    <div class="progress" id="progress">
+      <span class="progress__label" id="progressLabel">— / — guías completas</span>
+      <div class="progress__track"><div class="progress__fill" id="progressFill"></div></div>
+    </div>
+
+    <main class="main">
+      <section class="tab-panel" id="tabEscanear">
+        <form class="manual-entry" id="manualForm" autocomplete="off">
+          <label class="manual-entry__label" for="awbInput">AWB — pistola o manual</label>
+          <div class="manual-entry__row">
+            <input
+              type="text"
+              id="awbInput"
+              class="manual-entry__input"
+              placeholder="Y45132"
+              autocomplete="off"
+              autocapitalize="characters"
+              inputmode="text"
+            />
+            <button type="submit" class="btn btn--primary">Buscar</button>
+          </div>
+        </form>
+
+        <button class="camera-toggle" id="toggleScanBtn" type="button">📷 Usar cámara del celular</button>
+        <div id="reader" class="reader" hidden></div>
+
+        <p class="error" id="errorMsg" hidden></p>
+
+        <section class="result" id="result" hidden>
+          <div class="placard" id="placard">
+            <span class="placard__label" id="placardLabel">UBICACIÓN</span>
+            <span class="placard__value" id="placardValue">—</span>
+          </div>
+
+          <div class="caja-badge" id="cajaBadge">—</div>
+
+          <dl class="datastrip" id="datastrip">
+            <div class="datastrip__row">
+              <dt>AWB</dt>
+              <dd id="dataAwb">—</dd>
+            </div>
+            <div class="datastrip__row">
+              <dt>Cliente</dt>
+              <dd id="dataCliente">—</dd>
+            </div>
+            <div class="datastrip__row">
+              <dt>Peso Total</dt>
+              <dd id="dataPeso">—</dd>
+            </div>
+            <div class="datastrip__row">
+              <dt>Tipo Cliente</dt>
+              <dd id="dataTipo">—</dd>
+            </div>
+            <div class="datastrip__row">
+              <dt>Casillero</dt>
+              <dd id="dataCasillero">—</dd>
+            </div>
+          </dl>
+
+          <div class="override">
+            <span class="override__label">Corregir ubicación (opcional)</span>
+            <div class="override__pills" id="overridePills" role="group" aria-label="Corregir ubicación">
+              <button type="button" class="pill" data-loc="PALET 01">Palet 01</button>
+              <button type="button" class="pill" data-loc="PALET 02">Palet 02</button>
+              <button type="button" class="pill" data-loc="PALET 03">Palet 03</button>
+              <button type="button" class="pill" data-loc="ESTANTE 04">Estante 04</button>
+              <button type="button" class="pill" data-loc="PISO">Piso</button>
+            </div>
+          </div>
+
+          <button class="btn btn--confirm" id="nextBtn" type="button">Registrar otra guía</button>
+        </section>
+      </section>
+
+      <section class="tab-panel" id="tabCliente" hidden>
+        <form class="manual-entry" id="clienteForm" autocomplete="off">
+          <label class="manual-entry__label" for="clienteInput">Nombre del cliente</label>
+          <div class="manual-entry__row">
+            <input
+              type="text"
+              id="clienteInput"
+              class="manual-entry__input"
+              placeholder="JORGE LUIS VILLEGAS SICHE"
+              autocomplete="off"
+            />
+            <button type="submit" class="btn btn--primary">Buscar</button>
+          </div>
+        </form>
+        <div class="cliente-resultados" id="clienteResultados"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="vendor/html5-qrcode.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
