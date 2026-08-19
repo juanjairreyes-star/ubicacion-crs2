@@ -32,9 +32,6 @@ const els = {
   placard: document.getElementById('placard'),
   placardLabel: document.getElementById('placardLabel'),
   placardValue: document.getElementById('placardValue'),
-  confirmBanner: document.getElementById('confirmBanner'),
-  confirmIcon: document.getElementById('confirmIcon'),
-  confirmText: document.getElementById('confirmText'),
   dataAwb: document.getElementById('dataAwb'),
   dataCliente: document.getElementById('dataCliente'),
   dataPeso: document.getElementById('dataPeso'),
@@ -52,7 +49,10 @@ const els = {
   tabCliente: document.getElementById('tabCliente'),
   clienteForm: document.getElementById('clienteForm'),
   clienteInput: document.getElementById('clienteInput'),
-  clienteResultados: document.getElementById('clienteResultados')
+  clienteResultados: document.getElementById('clienteResultados'),
+  confirmOverlay: document.getElementById('confirmOverlay'),
+  confirmCard: document.getElementById('confirmCard'),
+  confirmValue: document.getElementById('confirmValue')
 };
 
 // ============================================
@@ -84,6 +84,26 @@ function escapeHtml(str) {
   div.textContent = str == null ? '' : str;
   return div.innerHTML;
 }
+
+// ============================================
+// CARTEL DE CONFIRMACIÓN (overlay, solo en registro exitoso)
+// ============================================
+let overlayTimer = null;
+
+function mostrarConfirmacion(mensaje, accentKey) {
+  clearTimeout(overlayTimer);
+  els.confirmCard.style.setProperty('--loc-accent', ACCENTS[accentKey] || 'var(--loc-palet01)');
+  els.confirmValue.textContent = mensaje;
+  els.confirmOverlay.hidden = false;
+  overlayTimer = setTimeout(ocultarConfirmacion, 1800);
+}
+
+function ocultarConfirmacion() {
+  clearTimeout(overlayTimer);
+  els.confirmOverlay.hidden = true;
+}
+
+els.confirmOverlay.addEventListener('click', ocultarConfirmacion);
 
 // ============================================
 // OPERADOR (recordado en este navegador)
@@ -201,23 +221,15 @@ function renderResultado(data) {
   const yaCompleta = data.registrado === false && data.completa === true;
   const ubicacion = data.ubicacionFinal || data.ubicacionSugerida;
 
-  // Cartel de confirmación — lo primero que ve el operador
+  // Cartel de confirmación por encima — solo en el momento del evento
   if (yaCompleta) {
-    els.confirmBanner.dataset.tipo = 'info';
-    els.confirmIcon.textContent = 'ℹ️';
-    els.confirmText.textContent = 'Ya estaba completa (' + data.cajaActual + '/' + data.cajasTotal + ') — no se registró de nuevo';
+    mostrarConfirmacion('YA ESTABA COMPLETA (' + data.cajaActual + '/' + data.cajasTotal + ')', 'YA_COMPLETA');
   } else if (data.cajasTotal <= 1) {
-    els.confirmBanner.dataset.tipo = 'exito';
-    els.confirmIcon.textContent = '✅';
-    els.confirmText.textContent = 'Guía única completa';
+    mostrarConfirmacion('GUÍA ÚNICA COMPLETA', 'PALET 01');
   } else if (data.cajaActual >= data.cajasTotal) {
-    els.confirmBanner.dataset.tipo = 'exito';
-    els.confirmIcon.textContent = '✅';
-    els.confirmText.textContent = 'Guía completa (' + data.cajaActual + '/' + data.cajasTotal + ')';
+    mostrarConfirmacion('GUÍA COMPLETADA (' + data.cajaActual + '/' + data.cajasTotal + ')', 'PALET 01');
   } else {
-    els.confirmBanner.dataset.tipo = 'exito';
-    els.confirmIcon.textContent = '✅';
-    els.confirmText.textContent = 'Se ha registrado ' + data.cajaActual + '/' + data.cajasTotal;
+    mostrarConfirmacion('REGISTRADO ' + data.cajaActual + '/' + data.cajasTotal, 'ESTANTE 04');
   }
 
   if (yaCompleta) {

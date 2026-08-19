@@ -338,31 +338,6 @@ html, body {
   .placard, .result { animation: none; }
 }
 
-/* ---------- Cartel de confirmación ---------- */
-.confirm-banner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 16px;
-  border-radius: var(--radius);
-  font-family: var(--font-body);
-  font-weight: 600;
-  font-size: 15px;
-  background: rgba(63, 190, 122, 0.12);
-  border: 1px solid var(--loc-palet01);
-  color: var(--loc-palet01);
-  animation: rise 220ms ease;
-}
-.confirm-banner[data-tipo="info"] {
-  background: rgba(176, 182, 192, 0.12);
-  border-color: var(--loc-revisar);
-  color: var(--text);
-}
-.confirm-banner__icon {
-  font-size: 18px;
-  line-height: 1;
-}
-
 /* ---------- Franja de datos ---------- */
 .datastrip {
   margin: 0;
@@ -447,6 +422,52 @@ html, body {
 .pill[data-loc="PALET 03"][data-active="true"] { background: var(--loc-palet03); }
 .pill[data-loc="ESTANTE 04"][data-active="true"] { background: var(--loc-estante04); }
 .pill[data-loc="PISO"][data-active="true"] { background: var(--loc-piso); }
+
+/* ---------- Cartel de confirmación (overlay) ---------- */
+.confirm-overlay[hidden] {
+  display: none;
+}
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 22, 26, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 50;
+  animation: overlayIn 150ms ease;
+  cursor: pointer;
+}
+
+.confirm-overlay__card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 6px solid var(--loc-accent, var(--loc-palet01));
+  border-radius: 16px;
+  padding: 32px 36px;
+  text-align: center;
+  max-width: 100%;
+  animation: stamp 260ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.confirm-overlay__value {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.25;
+  color: var(--loc-accent, var(--text));
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .confirm-overlay, .confirm-overlay__card { animation: none; }
+}
 
 /* ---------- Búsqueda por cliente ---------- */
 .cliente-resultados {
