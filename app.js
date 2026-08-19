@@ -159,9 +159,8 @@ async function actualizarProgreso() {
   }
 }
 
-// El progreso ya se actualiza al instante con cada escaneo (ver arriba).
-// Este intervalo es solo respaldo — por si otro operador registra algo
-// desde otro dispositivo mientras esta pantalla está abierta sin escanear.
+// Actualiza el progreso cada 30s en vez de después de cada escaneo —
+// escanear rápido ya no duplica la cantidad de peticiones al backend.
 setInterval(actualizarProgreso, 30000);
 
 // ============================================
@@ -241,7 +240,6 @@ async function procesarEscaneo(awb) {
 
     els.awbInput.value = '';
     renderResultado(data);
-    if (data.resumen) pintarProgreso(data.resumen);
   } catch (err) {
     setStatus('error');
     showError('No se pudo conectar con el servicio incluso tras varios intentos. Revisa la conexión.');
