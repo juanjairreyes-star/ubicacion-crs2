@@ -36,6 +36,7 @@
     <nav class="tabs" role="tablist">
       <button class="tab" data-tab="escanear" role="tab" aria-selected="true" type="button">Escanear</button>
       <button class="tab" data-tab="cliente" role="tab" aria-selected="false" type="button">Por cliente</button>
+      <button class="tab" data-tab="manifiestos" role="tab" aria-selected="false" type="button">Manifiestos</button>
     </nav>
 
     <div class="progress" id="progress">
@@ -125,6 +126,10 @@
           </div>
         </form>
         <div class="cliente-resultados" id="clienteResultados"></div>
+      </section>
+
+      <section class="tab-panel" id="tabManifiestos" hidden>
+        <div class="manifiestos-resultados" id="manifiestosResultados"></div>
       </section>
     </main>
   </div>

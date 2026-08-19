@@ -524,3 +524,72 @@ html, body {
   color: var(--loc-palet02);
   background: rgba(232, 169, 59, 0.12);
 }
+
+/* ---------- Manifiestos ---------- */
+.manifiestos-resultados {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.manifiesto-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.manifiesto-item[data-completo="true"] {
+  border-color: var(--loc-palet01);
+}
+
+.manifiesto-item__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.manifiesto-item__nombre {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.manifiesto-item__conteo {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.manifiesto-item__track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-raised);
+  overflow: hidden;
+}
+
+.manifiesto-item__fill {
+  height: 100%;
+  background: var(--loc-estante04);
+  border-radius: 3px;
+  transition: width 300ms ease;
+}
+.manifiesto-item[data-completo="true"] .manifiesto-item__fill {
+  background: var(--loc-palet01);
+}
+
+.manifiesto-item__badge {
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: var(--loc-palet01);
+  background: rgba(63, 190, 122, 0.14);
+}

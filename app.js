@@ -20,6 +20,26 @@ let html5QrCode = null;
 let scanning = false;
 
 // ============================================
+// FETCH CON REINTENTOS — la red del almacén puede ser intermitente;
+// esto reintenta antes de mostrar error, en vez de fallar a la primera.
+// ============================================
+async function fetchConReintentos(url, options, intentos) {
+  intentos = intentos || 3;
+  let ultimoError;
+  for (let i = 0; i < intentos; i++) {
+    try {
+      return await fetch(url, options);
+    } catch (err) {
+      ultimoError = err;
+      if (i < intentos - 1) {
+        await new Promise(function (resolve) { setTimeout(resolve, 1000 * (i + 1)); });
+      }
+    }
+  }
+  throw ultimoError;
+}
+
+// ============================================
 // ELEMENTOS
 // ============================================
 const els = {
@@ -47,9 +67,11 @@ const els = {
   tabs: document.querySelectorAll('.tab'),
   tabEscanear: document.getElementById('tabEscanear'),
   tabCliente: document.getElementById('tabCliente'),
+  tabManifiestos: document.getElementById('tabManifiestos'),
   clienteForm: document.getElementById('clienteForm'),
   clienteInput: document.getElementById('clienteInput'),
   clienteResultados: document.getElementById('clienteResultados'),
+  manifiestosResultados: document.getElementById('manifiestosResultados'),
   confirmOverlay: document.getElementById('confirmOverlay'),
   confirmCard: document.getElementById('confirmCard'),
   confirmValue: document.getElementById('confirmValue')
@@ -137,6 +159,10 @@ async function actualizarProgreso() {
   }
 }
 
+// Actualiza el progreso cada 30s en vez de después de cada escaneo —
+// escanear rápido ya no duplica la cantidad de peticiones al backend.
+setInterval(actualizarProgreso, 30000);
+
 // ============================================
 // CÁMARA (secundaria — el método principal es la pistola/manual)
 // ============================================
@@ -193,8 +219,13 @@ async function procesarEscaneo(awb) {
     return;
   }
 
+  setStatus('esperando');
+  const botonBuscar = els.manualForm.querySelector('button[type="submit"]');
+  botonBuscar.disabled = true;
+  botonBuscar.textContent = 'Buscando…';
+
   try {
-    const res = await fetch(CONFIG.API_URL, {
+    const res = await fetchConReintentos(CONFIG.API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // evita preflight CORS con Apps Script
       body: JSON.stringify({ awb: awb, operador: operador })
@@ -209,10 +240,12 @@ async function procesarEscaneo(awb) {
 
     els.awbInput.value = '';
     renderResultado(data);
-    actualizarProgreso();
   } catch (err) {
     setStatus('error');
-    showError('No se pudo conectar con el servicio. Revisa CONFIG.API_URL en app.js.');
+    showError('No se pudo conectar con el servicio incluso tras varios intentos. Revisa la conexión.');
+  } finally {
+    botonBuscar.disabled = false;
+    botonBuscar.textContent = 'Buscar';
   }
 }
 
@@ -273,7 +306,7 @@ els.overridePills.addEventListener('click', async (e) => {
   document.querySelectorAll('.pill').forEach((p) => (p.disabled = true));
 
   try {
-    const res = await fetch(CONFIG.API_URL, {
+    const res = await fetchConReintentos(CONFIG.API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ accion: 'corregir', awb: currentAwb, ubicacion: nuevaUbicacion, operador: operador })
@@ -300,11 +333,11 @@ els.overridePills.addEventListener('click', async (e) => {
 async function buscarCliente(nombre) {
   els.clienteResultados.innerHTML = '<p class="cliente-loading">Buscando…</p>';
   try {
-    const res = await fetch(CONFIG.API_URL + '?accion=cliente&nombre=' + encodeURIComponent(nombre));
+    const res = await fetchConReintentos(CONFIG.API_URL + '?accion=cliente&nombre=' + encodeURIComponent(nombre));
     const data = await res.json();
     renderResultadosCliente(data);
   } catch (err) {
-    els.clienteResultados.innerHTML = '<p class="error">No se pudo buscar. Revisa la conexión.</p>';
+    els.clienteResultados.innerHTML = '<p class="error">No se pudo buscar tras varios intentos. Revisa la conexión.</p>';
   }
 }
 
@@ -331,6 +364,41 @@ function renderResultadosCliente(data) {
 }
 
 // ============================================
+// MANIFIESTOS — progreso por hoja Mxxx
+// ============================================
+async function buscarManifiestos() {
+  els.manifiestosResultados.innerHTML = '<p class="cliente-loading">Cargando…</p>';
+  try {
+    const res = await fetchConReintentos(CONFIG.API_URL + '?accion=manifiestos');
+    const data = await res.json();
+    renderManifiestos(data);
+  } catch (err) {
+    els.manifiestosResultados.innerHTML = '<p class="error">No se pudo cargar. Revisa la conexión.</p>';
+  }
+}
+
+function renderManifiestos(data) {
+  if (!data.manifiestos || data.manifiestos.length === 0) {
+    els.manifiestosResultados.innerHTML = '<p class="cliente-empty">No se detectaron hojas de manifiesto.</p>';
+    return;
+  }
+
+  els.manifiestosResultados.innerHTML = data.manifiestos.map(function (m) {
+    const porcentaje = m.totalEsperado > 0 ? (m.totalCompletas / m.totalEsperado) * 100 : 0;
+    const badge = m.completado ? '<span class="manifiesto-item__badge">MANIFIESTO COMPLETADO</span>' : '';
+
+    return '<div class="manifiesto-item" data-completo="' + m.completado + '">' +
+      '<div class="manifiesto-item__header">' +
+      '<span class="manifiesto-item__nombre">' + escapeHtml(m.hoja) + '</span>' +
+      '<span class="manifiesto-item__conteo">' + m.totalCompletas + ' / ' + m.totalEsperado + '</span>' +
+      '</div>' +
+      '<div class="manifiesto-item__track"><div class="manifiesto-item__fill" style="width:' + porcentaje + '%"></div></div>' +
+      badge +
+      '</div>';
+  }).join('');
+}
+
+// ============================================
 // TABS
 // ============================================
 els.tabs.forEach((tab) => {
@@ -340,7 +408,9 @@ els.tabs.forEach((tab) => {
     const activo = tab.dataset.tab;
     els.tabEscanear.hidden = activo !== 'escanear';
     els.tabCliente.hidden = activo !== 'cliente';
+    els.tabManifiestos.hidden = activo !== 'manifiestos';
     if (activo === 'escanear') els.awbInput.focus();
+    if (activo === 'manifiestos') buscarManifiestos();
   });
 });
 
