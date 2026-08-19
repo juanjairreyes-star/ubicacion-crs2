@@ -2,7 +2,7 @@
 // CONFIGURACIÓN
 // ============================================
 const CONFIG = {
-  API_URL: 'https://script.google.com/macros/s/AKfycby8gZ1R_6TcLEWCnSfH8t2KkCctes--BVpw1mRuGHAnV6dAY2z7bdYDErFPgu23H2k/exec'
+  API_URL: 'https://script.google.com/macros/s/AKfycbx6JXvDm8vS3nBn_jdohfaioZSReJgUUk4UGO-7LqxN4_zw45YBDMxQqVqUF8gVWGyy/exec'
 };
 
 const ACCENTS = {
