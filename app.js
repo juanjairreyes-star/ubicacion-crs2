@@ -390,13 +390,63 @@ function renderManifiestos(data) {
     return '<div class="manifiesto-item" data-completo="' + m.completado + '">' +
       '<div class="manifiesto-item__header">' +
       '<span class="manifiesto-item__nombre">' + escapeHtml(m.hoja) + '</span>' +
-      '<span class="manifiesto-item__conteo">' + m.totalCompletas + ' / ' + m.totalEsperado + '</span>' +
+      '<button type="button" class="manifiesto-item__conteo-btn" data-hoja="' + escapeHtml(m.hoja) + '">' + m.totalCompletas + ' / ' + m.totalEsperado + '</button>' +
       '</div>' +
       '<div class="manifiesto-item__track"><div class="manifiesto-item__fill" style="width:' + porcentaje + '%"></div></div>' +
       badge +
       '</div>';
   }).join('');
 }
+
+async function verDetalleManifiesto(hoja) {
+  els.manifiestosResultados.innerHTML = '<p class="cliente-loading">Cargando ' + escapeHtml(hoja) + '…</p>';
+  try {
+    const res = await fetchConReintentos(CONFIG.API_URL + '?accion=manifiesto&hoja=' + encodeURIComponent(hoja));
+    const data = await res.json();
+    renderDetalleManifiesto(data);
+  } catch (err) {
+    els.manifiestosResultados.innerHTML = '<p class="error">No se pudo cargar. Revisa la conexión.</p>';
+  }
+}
+
+function renderDetalleManifiesto(data) {
+  const encabezado = '<button type="button" class="manifiesto-detalle__volver">← Volver a manifiestos</button>' +
+    '<p class="cliente-total">' + escapeHtml(data.hoja) + ' — ' + data.totalGuias + ' guía(s)</p>';
+
+  if (!data.guias || data.guias.length === 0) {
+    els.manifiestosResultados.innerHTML = encabezado + '<p class="cliente-empty">Sin guías en este manifiesto.</p>';
+    return;
+  }
+
+  const filas = data.guias.map(function (g) {
+    const estadoTexto = g.completa
+      ? escapeHtml(g.ubicacionActual || g.ubicacionSugerida)
+      : 'Pendiente (' + g.cajaActual + '/' + g.cajasTotal + ')';
+    const estadoClave = g.completa ? 'completa' : 'pendiente';
+
+    return '<div class="cliente-item">' +
+      '<div class="cliente-item__awb">' + escapeHtml(g.awb) + '</div>' +
+      '<div class="cliente-item__meta">' + escapeHtml(g.cliente) + ' · ' + g.pesoTotal.toFixed(2) + ' kg · ' + escapeHtml(g.tipoCliente) + '</div>' +
+      '<span class="cliente-item__estado" data-estado="' + estadoClave + '">' + estadoTexto + '</span>' +
+      '</div>';
+  }).join('');
+
+  els.manifiestosResultados.innerHTML = encabezado + filas;
+}
+
+// Delegación de clics: el contenido de manifiestosResultados se regenera
+// completo en cada render, así que los listeners van en el contenedor fijo.
+els.manifiestosResultados.addEventListener('click', function (e) {
+  const botonConteo = e.target.closest('.manifiesto-item__conteo-btn');
+  if (botonConteo) {
+    verDetalleManifiesto(botonConteo.dataset.hoja);
+    return;
+  }
+  const botonVolver = e.target.closest('.manifiesto-detalle__volver');
+  if (botonVolver) {
+    buscarManifiestos();
+  }
+});
 
 // ============================================
 // TABS

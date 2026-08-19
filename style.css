@@ -565,6 +565,37 @@ html, body {
   white-space: nowrap;
 }
 
+.manifiesto-item__conteo-btn {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: border-color 150ms ease, color 150ms ease;
+}
+.manifiesto-item__conteo-btn:hover,
+.manifiesto-item__conteo-btn:focus-visible {
+  border-color: var(--loc-estante04);
+  color: var(--text);
+}
+
+.manifiesto-detalle__volver {
+  display: block;
+  background: none;
+  border: none;
+  color: var(--loc-estante04);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 0 0 12px;
+  cursor: pointer;
+}
+
 .manifiesto-item__track {
   height: 6px;
   border-radius: 3px;
