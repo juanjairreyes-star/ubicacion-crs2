@@ -209,7 +209,7 @@ async function procesarEscaneo(awb) {
 
     els.awbInput.value = '';
     renderResultado(data);
-    if (data.resumen) pintarProgreso(data.resumen);
+    actualizarProgreso();
   } catch (err) {
     setStatus('error');
     showError('No se pudo conectar con el servicio. Revisa CONFIG.API_URL en app.js.');
