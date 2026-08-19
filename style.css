@@ -338,21 +338,29 @@ html, body {
   .placard, .result { animation: none; }
 }
 
-/* ---------- Badge de cajas ---------- */
-.caja-badge {
-  align-self: flex-start;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-muted);
-  background: var(--surface-raised);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 5px 12px;
-}
-.caja-badge[data-completa="true"] {
+/* ---------- Cartel de confirmación ---------- */
+.confirm-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 15px;
+  background: rgba(63, 190, 122, 0.12);
+  border: 1px solid var(--loc-palet01);
   color: var(--loc-palet01);
-  border-color: var(--loc-palet01);
+  animation: rise 220ms ease;
+}
+.confirm-banner[data-tipo="info"] {
+  background: rgba(176, 182, 192, 0.12);
+  border-color: var(--loc-revisar);
+  color: var(--text);
+}
+.confirm-banner__icon {
+  font-size: 18px;
+  line-height: 1;
 }
 
 /* ---------- Franja de datos ---------- */

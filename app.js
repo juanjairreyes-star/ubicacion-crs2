@@ -32,7 +32,9 @@ const els = {
   placard: document.getElementById('placard'),
   placardLabel: document.getElementById('placardLabel'),
   placardValue: document.getElementById('placardValue'),
-  cajaBadge: document.getElementById('cajaBadge'),
+  confirmBanner: document.getElementById('confirmBanner'),
+  confirmIcon: document.getElementById('confirmIcon'),
+  confirmText: document.getElementById('confirmText'),
   dataAwb: document.getElementById('dataAwb'),
   dataCliente: document.getElementById('dataCliente'),
   dataPeso: document.getElementById('dataPeso'),
@@ -199,21 +201,29 @@ function renderResultado(data) {
   const yaCompleta = data.registrado === false && data.completa === true;
   const ubicacion = data.ubicacionFinal || data.ubicacionSugerida;
 
+  // Cartel de confirmación — lo primero que ve el operador
   if (yaCompleta) {
-    pintarPlacard('YA_COMPLETA', 'YA ESTABA COMPLETA', ubicacion);
+    els.confirmBanner.dataset.tipo = 'info';
+    els.confirmIcon.textContent = 'ℹ️';
+    els.confirmText.textContent = 'Ya estaba completa (' + data.cajaActual + '/' + data.cajasTotal + ') — no se registró de nuevo';
+  } else if (data.cajasTotal <= 1) {
+    els.confirmBanner.dataset.tipo = 'exito';
+    els.confirmIcon.textContent = '✅';
+    els.confirmText.textContent = 'Guía única completa';
+  } else if (data.cajaActual >= data.cajasTotal) {
+    els.confirmBanner.dataset.tipo = 'exito';
+    els.confirmIcon.textContent = '✅';
+    els.confirmText.textContent = 'Guía completa (' + data.cajaActual + '/' + data.cajasTotal + ')';
   } else {
-    pintarPlacard(ubicacion, 'UBICACIÓN', ubicacion);
+    els.confirmBanner.dataset.tipo = 'exito';
+    els.confirmIcon.textContent = '✅';
+    els.confirmText.textContent = 'Se ha registrado ' + data.cajaActual + '/' + data.cajasTotal;
   }
 
-  if (data.cajasTotal <= 1) {
-    els.cajaBadge.textContent = 'GUÍA ÚNICA COMPLETA';
-    els.cajaBadge.dataset.completa = 'true';
-  } else if (data.cajaActual >= data.cajasTotal) {
-    els.cajaBadge.textContent = 'GUÍA COMPLETA (' + data.cajaActual + '/' + data.cajasTotal + ')';
-    els.cajaBadge.dataset.completa = 'true';
+  if (yaCompleta) {
+    pintarPlacard('YA_COMPLETA', 'UBICACIÓN REGISTRADA', ubicacion);
   } else {
-    els.cajaBadge.textContent = 'CAJA ' + data.cajaActual + ' / ' + data.cajasTotal;
-    els.cajaBadge.dataset.completa = 'false';
+    pintarPlacard(ubicacion, 'UBICACIÓN', ubicacion);
   }
 
   els.dataAwb.textContent = data.awb;
