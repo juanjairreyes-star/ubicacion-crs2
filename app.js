@@ -142,7 +142,10 @@ function guardarOperador() {
 // ============================================
 // PROGRESO DEL MANIFIESTO (guías completas / total)
 // ============================================
+let resumenActual = { totalCompletas: 0, totalEsperado: 0 };
+
 function pintarProgreso(resumen) {
+  resumenActual = resumen;
   els.progressLabel.textContent = resumen.totalCompletas + ' / ' + resumen.totalEsperado + ' guías completas';
   const porcentaje = resumen.totalEsperado > 0 ? (resumen.totalCompletas / resumen.totalEsperado) * 100 : 0;
   els.progressFill.style.width = porcentaje + '%';
@@ -159,9 +162,10 @@ async function actualizarProgreso() {
   }
 }
 
-// Actualiza el progreso cada 30s en vez de después de cada escaneo —
-// escanear rápido ya no duplica la cantidad de peticiones al backend.
-setInterval(actualizarProgreso, 30000);
+// El contador ya sube al instante con cada escaneo propio (arriba en
+// procesarEscaneo). Este intervalo es solo respaldo — por si otro
+// operador registra algo desde otro dispositivo al mismo tiempo.
+setInterval(actualizarProgreso, 15000);
 
 // ============================================
 // CÁMARA (secundaria — el método principal es la pistola/manual)
@@ -240,6 +244,13 @@ async function procesarEscaneo(awb) {
 
     els.awbInput.value = '';
     renderResultado(data);
+
+    // Incremento al instante, sin esperar al servidor: si este escaneo
+    // dejó la guía completa, sube el contador general ya mismo.
+    if (data.registrado === true && data.completa === true) {
+      resumenActual.totalCompletas = Math.min(resumenActual.totalCompletas + 1, resumenActual.totalEsperado);
+      pintarProgreso(resumenActual);
+    }
   } catch (err) {
     setStatus('error');
     showError('No se pudo conectar con el servicio incluso tras varios intentos. Revisa la conexión.');
